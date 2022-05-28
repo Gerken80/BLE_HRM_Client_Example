@@ -1,19 +1,25 @@
-uint32_t testData = 0b1000000110000110;
+
+uint32_t testData = 0xFF00FF06;
 uint16_t heartRate16;
 uint8_t heartRate8;
-bool HRValueFormat;
-bool sensorContactDetected;
-bool sensorContactSupported;
-bool energyExpendedSupported;
-bool RRIntervalsPresent;
-bool reserved5;
-bool reserved6;
-bool reserved7;
+
 
 void setup() {
+  bool HRDataSize16;
+  
   startSerial();
   Serial.println(testData, BIN);
-  flagData(testData);
+  Serial.println(testData, HEX);
+  HRDataSize16 = flagData(testData);
+  if (!HRDataSize16){
+    heartRate8 = testData >> 8;
+    Serial.print("8 bit Heart rate is: ");
+    Serial.println(heartRate8, DEC);
+  } else {
+    heartRate16 = testData >> 8;
+    Serial.print("16 bit Heart rate is: ");
+    Serial.println(heartRate16, DEC);
+}
 }
 
 void loop() {
@@ -27,7 +33,16 @@ void startSerial(){
   Serial.println();
 }
 
-void flagData(uint8_t testData){
+bool flagData(uint8_t testData){
+  bool HRValueFormat;
+  bool sensorContactDetected;
+  bool sensorContactSupported;
+  bool energyExpendedSupported;
+  bool RRIntervalsPresent;
+  bool reserved5;
+  bool reserved6;
+  bool reserved7;
+  
   HRValueFormat = bitRead(testData, 0);
   sensorContactDetected = bitRead(testData, 1);
   sensorContactSupported = bitRead(testData, 2);
@@ -80,4 +95,5 @@ void flagData(uint8_t testData){
      break;
   }
   Serial.println("-------------------------------------------------");
+  return HRValueFormat;
 }
