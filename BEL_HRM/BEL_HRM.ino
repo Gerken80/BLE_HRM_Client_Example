@@ -1,14 +1,43 @@
-void setup() {
-  // put your setup code here, to run once:
+#include <ArduinoBLE.h>
 
+void setup() {
+  startSerial();
+
+  BLE.begin();
+
+  BLE.scanForUuid("180d");
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  BLEDevice HRMservice = BLE.available();
 
+  if (HRMservice) {
+    if (HRMservice.advertisedServiceUuid() == "180d") {
+      BLE.stopScan();
+      HRMservice.connect();
+      HRMservice.discoverAttributes();
+
+      BLECharacteristic HRMcharacteristic = HRMservice.characteristic("2a37");
+      HRMcharacteristic.subscribe();
+      
+      while (HRMservice.connected()) {
+        uint8_t byteArrayLength = HRMcharacteristic.valueLength();
+        Serial.println();
+        Serial.print("Bytes: ");
+        Serial.println(byteArrayLength, DEC);
+        uint8_t HRMarray[byteArrayLength];
+        HRMcharacteristic.readValue(HRMarray, byteArrayLength);
+        flagData(HRMarray[0]);
+        delay(5000);
+      }
+    }
+  }
+
+  BLE.scan();
+  delay(1000);
 }
 
-bool flagData(uint8_t testData){
+void flagData(uint8_t testData){
   bool HRValueFormat;
   bool sensorContactDetected;
   bool sensorContactSupported;
@@ -70,5 +99,14 @@ bool flagData(uint8_t testData){
      break;
   }
   Serial.println("-------------------------------------------------");
-  return HRValueFormat;
+}
+
+
+void startSerial() {
+  Serial.begin(9600);
+  while (!Serial)
+    ;
+  Serial.println("-----------------------------");
+  Serial.println("Serial Connection Established");
+  Serial.println("-----------------------------");
 }
