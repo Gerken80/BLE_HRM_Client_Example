@@ -25,10 +25,18 @@ void loop() {
         Serial.println();
         Serial.print("Bytes: ");
         Serial.println(byteArrayLength, DEC);
+        
         uint8_t HRMarray[byteArrayLength];
         HRMcharacteristic.readValue(HRMarray, byteArrayLength);
+        Serial.print("HR ");
+        Serial.println(HRMarray[1], DEC);
+        Serial.println(HRMarray[2], HEX);
+        Serial.println(HRMarray[3], HEX);
+        Serial.println(HRMarray[4], HEX);
+        Serial.println(HRMarray[5], HEX);
+
         flagData(HRMarray[0]);
-        delay(5000);
+        delay(1000);
       }
     }
   }
